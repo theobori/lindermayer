@@ -1,0 +1,22 @@
+pub enum Do {
+    Forward,
+    Backward,
+    HalfForward,
+    HalfBackward,
+    TurnRight,
+    TurnLeft,
+    PenUp,
+    PenDown,
+    TurnRandom,
+    ColorRandom,
+    Save,
+    Restore,
+    IncreaseSize,
+    DecreaseSize,
+    Size1,
+    Size2,
+    Size3,
+    Size4,
+    Size5,
+    Size6
+}
