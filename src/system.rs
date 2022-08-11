@@ -62,20 +62,24 @@ impl LSystem {
         self.data.consts.contains(&c)
     }
 
-    fn add_var(&mut self, var: char) {
+    pub fn add_var(&mut self, var: char) -> &Self {
         if self.is_const(var) {
             panic!("{} is also a constant", var)
         }
 
         self.data.vars.push(var);
+
+        self
     }
 
-    fn add_const(&mut self, c: char) {
+    pub fn add_const(&mut self, c: char) -> &Self{
         if self.is_var(c) {
             panic!("{} is also a variable", c)
         }
 
         self.data.consts.push(c);
+
+        self
     }
 }
 
