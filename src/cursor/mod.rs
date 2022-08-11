@@ -1,2 +1,2 @@
-pub mod svg;
+pub mod lyon;
 pub mod turtle;

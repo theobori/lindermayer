@@ -1,8 +1,8 @@
 pub trait Cursor {
-    fn step_forward(&mut self, multiplier: usize);
-    fn step_backward(&mut self, multiplier: usize);
-    fn turn_left(&mut self);
-    fn turn_right(&mut self);
+    fn step_forward(&mut self, length: usize);
+    fn step_backward(&mut self, length: usize);
+    fn turn_left(&mut self, angle: usize);
+    fn turn_right(&mut self, angle: usize);
     fn turn_random(&mut self);
     fn pen_up(&mut self);
     fn pen_down(&mut self);

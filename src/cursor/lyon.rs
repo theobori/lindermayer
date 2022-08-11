@@ -1,23 +1,23 @@
 use crate::models::cursor_model::Cursor;
 
-pub struct Svg {
+pub struct Lyon {
 
 }
 
-impl Cursor for Svg {
-    fn step_forward(&mut self, multiplier: usize) {
+impl Cursor for Lyon {
+    fn step_forward(&mut self, length: usize) {
         todo!()
     }
 
-    fn step_backward(&mut self, multiplier: usize) {
+    fn step_backward(&mut self, length: usize) {
         todo!()
     }
 
-    fn turn_left(&mut self) {
+    fn turn_left(&mut self, angle: usize) {
         todo!()
     }
 
-    fn turn_right(&mut self) {
+    fn turn_right(&mut self, angle: usize) {
         todo!()
     }
 

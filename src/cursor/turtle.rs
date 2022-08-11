@@ -4,20 +4,28 @@ pub struct Turtle {
 
 }
 
+impl Turtle {
+    pub fn new() -> Self {
+        Self {
+        
+        }
+    }
+}
+
 impl Cursor for Turtle {
-    fn step_forward(&mut self, multiplier: usize) {
+    fn step_forward(&mut self, length: usize) {
         todo!()
     }
 
-    fn step_backward(&mut self, multiplier: usize) {
+    fn step_backward(&mut self, length: usize) {
         todo!()
     }
 
-    fn turn_left(&mut self) {
+    fn turn_left(&mut self, angle: usize) {
         todo!()
     }
 
-    fn turn_right(&mut self) {
+    fn turn_right(&mut self, angle: usize) {
         todo!()
     }
 

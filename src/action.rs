@@ -1,22 +1,16 @@
+#[derive(Clone)]
 pub enum Do {
-    Forward,
-    Backward,
-    HalfForward,
-    HalfBackward,
-    TurnRight,
-    TurnLeft,
+    Forward(usize),
+    Backward(usize),
+    Left(usize),
+    Right(usize),
     PenUp,
     PenDown,
     TurnRandom,
     ColorRandom,
     Save,
     Restore,
-    IncreaseSize,
-    DecreaseSize,
-    Size1,
-    Size2,
-    Size3,
-    Size4,
-    Size5,
-    Size6
+    IncreaseSize(usize),
+    DecreaseSize(usize),
+    LineSize(usize)
 }
