@@ -5,30 +5,23 @@ use crate::{
         rules_model::Rules,
         trace_model::Trace,
         action_model::Action,
-        cursor_model::Cursor
+        render_model::Render
     },
-    action::Do, cursor::turtle::Turtle
+    action::Do,
+    state::ScreenPosition,
+    renders::render::RenderType
 };
 
 #[derive(Debug, Clone)]
 pub struct LState {
     /// Current line value
     pub value: String,
-    /// Cursor location (x)
-    pub x: i32,
-    /// Cursor location (y)
-    pub y: i32,
-    /// Cursor orientation
-    pub angle: usize
 }
 
 impl Default for LState {
     fn default() -> Self {
         Self {
             value: String::from(""),
-            x: 0,
-            y: 0,
-            angle: 180
          }
     }
 }
@@ -38,19 +31,13 @@ pub struct LData {
     pub vars: Vec<char>,
     /// Containing constants
     pub consts: Vec<char>,
-    /// Width of the graphic
-    pub w: usize,
-    /// Height of the graphic
-    pub h: usize
 }
 
 impl LData {
-    pub fn new(w: usize, h: usize) -> Self {
+    pub fn new() -> Self {
         Self {
             vars: Vec::new(),
             consts: Vec::new(),
-            w,
-            h
         }
     }
 }
@@ -69,19 +56,19 @@ pub struct Lindenmayer {
     /// Actions for vars / consts
     actions: HashMap<char, Do>,
     /// Graphics cursor
-    cursor: Box<dyn Cursor>,
+    cursor: Box<dyn Render>,
 }
 
 impl Lindenmayer {
-    pub fn new(w: usize, h: usize) -> Self {
+    pub fn new(render: RenderType) -> Self {
         Self {
-            data: LData::new(w, h),
+            data: LData::new(),
             trace_states: Vec::new(),
             current_state: LState::default(),
             state_index: 0,
             rules: HashMap::new(),
             actions: HashMap::new(),
-            cursor: Box::new(Turtle::new())
+            cursor: render.get_render()
         }
     }
 
@@ -127,19 +114,6 @@ impl Lindenmayer {
         self
     }
 
-    pub fn angle(&mut self, angle: usize) -> &mut Self {
-        self.current_state.angle = angle;
-        
-        self
-    }
-
-    pub fn location(&mut self, x: i32, y: i32) -> &mut Self {
-        self.current_state.x = x;
-        self.current_state.y = y;
-        
-        self
-    }
-
     fn overwrite_state_value(&mut self) {
         // Overwrite state value with the rules table
         let mut next_value = String::from("");
@@ -157,9 +131,6 @@ impl Lindenmayer {
         // New current state
         self.current_state = LState {
             value: next_value,
-            x: self.current_state.x,
-            y: self.current_state.y,
-            angle: self.current_state.angle
         };
     }
 
@@ -198,12 +169,23 @@ impl Lindenmayer {
         self
     }
 
-    pub fn set_render(&mut self, cursor: Box<dyn Cursor>) -> &mut Self {
-        self.cursor = cursor;
+    pub fn set_render(&mut self, cursor: RenderType) -> &mut Self {
+        self.cursor = cursor.get_render();
 
         self
     }
 
+    pub fn save_svg(&mut self, filename: &str) -> &mut Self {
+        self.cursor.save_svg(filename);
+
+        self
+    }
+
+    pub fn set_start_pos(&mut self, pos: ScreenPosition) -> &mut Self {
+        self.cursor.set_pos(pos);
+        
+        self
+    }
 }
 
 impl Action for Lindenmayer {
@@ -233,13 +215,13 @@ impl Action for Lindenmayer {
             Do::Right(angle) => self.cursor.turn_right(angle),
             Do::PenUp => self.cursor.pen_up(),
             Do::PenDown => self.cursor.pen_down(),
-            Do::TurnRandom => todo!(),
-            Do::ColorRandom => todo!(),
+            Do::TurnRandom => self.cursor.turn_random(),
+            Do::ColorRandom => self.cursor.color_random(),
             Do::Save => self.cursor.save_state(),
             Do::Restore => self.cursor.restore_state(),
             Do::IncreaseSize(size) => todo!(),
             Do::DecreaseSize(size) => todo!(),
-            Do::LineSize(size) => self.cursor.set_size(size),
+            Do::LineSize(size) => self.cursor.set_pen_size(size),
         }
     }
 }
