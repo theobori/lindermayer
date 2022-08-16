@@ -14,7 +14,6 @@ pub enum Do {
     Restore,
     SaveAndTurn(Angle),
     RestoreAndTurn(Angle),
-    IncreaseSize(f64),
-    DecreaseSize(f64),
-    LineSize(f64)
+    LineSize(f64),
+    PenColor(f64, f64, f64)
 }

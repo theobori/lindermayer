@@ -1,17 +1,17 @@
-use crate::models::render_model::Render;
+use crate::{models::render_model::Render, state::SizeType};
 
-use super::turtle::TurtleRender;
+use super::turtle::{TurtleRender};
 
 pub enum RenderType {
-    TurtleNormal(u32, u32),
-    TurtleHeadless(f64, f64)
+    TurtleNormal(SizeType),
+    TurtleHeadless(SizeType),
 }
 
 impl RenderType {
     pub fn get_render(self) -> Box<dyn Render> {
         let render = match self {
-            RenderType::TurtleNormal(w, h) => TurtleRender::new(w, h),
-            RenderType::TurtleHeadless(_, _) => todo!(),
+            RenderType::TurtleNormal(s) => TurtleRender::new(s),
+            RenderType::TurtleHeadless(_) => todo!(),
         };
 
         Box::new(render)

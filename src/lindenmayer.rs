@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::{
     models::{
         rules_model::Rules,
-        trace_model::Trace,
         action_model::Action,
         render_model::Render
     },
@@ -45,10 +44,6 @@ impl LData {
 pub struct Lindenmayer {
     /// Constant data
     data: LData,
-    /// Trace of the states over iterations
-    trace_states: Vec<LState>,
-    /// Index to navigate throught states (for Trace)
-    state_index: usize,
     /// Current state
     current_state: LState,
     /// Rules table
@@ -63,9 +58,7 @@ impl Lindenmayer {
     pub fn new(render: RenderType) -> Self {
         Self {
             data: LData::new(),
-            trace_states: Vec::new(),
             current_state: LState::default(),
-            state_index: 0,
             rules: HashMap::new(),
             actions: HashMap::new(),
             cursor: render.get_render()
@@ -154,9 +147,6 @@ impl Lindenmayer {
     }
 
     fn step(&mut self) {
-        // Saving the current state in the traces
-        self.add_trace(self.current_state.clone());
-
         // Overwriting
         self.overwrite_state_value();
     }
@@ -184,6 +174,22 @@ impl Lindenmayer {
     pub fn set_start_pos(&mut self, pos: ScreenPosition) -> &mut Self {
         self.cursor.set_pos(pos);
         
+        self
+    }
+
+    pub fn set_background(&mut self, r: f64, g: f64, b: f64) -> &mut Self {
+        self.cursor.set_bg(r, g, b);
+        
+        self
+    }
+
+    pub fn reset(&mut self) -> &mut Self {
+        // Reset Screen
+        self.cursor.reset();
+        
+        // Reset LState
+        self.current_state = LState::default();
+
         self
     }
 }
@@ -219,67 +225,11 @@ impl Action for Lindenmayer {
             Do::ColorRandom => self.cursor.color_random(),
             Do::Save => self.cursor.save_state(),
             Do::Restore => self.cursor.restore_state(),
-            Do::IncreaseSize(size) => todo!(),
-            Do::DecreaseSize(size) => todo!(),
             Do::LineSize(size) => self.cursor.set_pen_size(size),
             Do::SaveAndTurn(angle) => self.cursor.save_state_and_turn(angle),
             Do::RestoreAndTurn(angle) => self.cursor.restore_state_and_turn(angle),
+            Do::PenColor(r, g, b) => self.cursor.set_pen_color(r, g, b),
         }
-    }
-}
-
-impl Trace for Lindenmayer {
-    type State = LState;
-    type States = Vec<Self::State>;
-
-    fn add_trace(&mut self, trace: Self::State) {
-        self.trace_states.push(trace);
-    }
-
-    fn get_step(&self, n: usize) -> Option<Self::State> {
-        if n >= self.trace_states.len() {
-            return None;
-        }
-
-        Some(self.trace_states[n].clone())
-    }
-
-    fn next_trace(&mut self) -> Option<Self::State> {
-        let index = self.state_index + 1;
-
-        if self.is_empty() || index >= self.trace_states.len() {
-            return None;
-        }
-
-        self.state_index = index;
-
-        Some(self.trace_states[index].clone())
-    }
-
-    fn is_empty(&self) -> bool {
-        self.trace_states.len() == 0
-    }
-
-    fn previous_trace(&mut self) -> Option<Self::State> {
-        if self.is_empty() || self.state_index <= 0 {
-            return None;
-        }
-
-        self.state_index -= 1;
-
-        Some(self.trace_states[self.state_index].clone())
-    }
-
-    fn all_traces(&self) -> Self::States {
-        self.trace_states.clone()
-    }
-
-    fn set_step(&mut self, n: usize) -> Option<Self::State> {
-        if n >= self.trace_states.len() {
-            return None;
-        }
-
-        Some(self.trace_states[n].clone())
     }
 }
 

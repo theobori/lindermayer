@@ -67,4 +67,16 @@ impl Render for TurtleHeadless {
     fn restore_state_and_turn(&mut self, angle: Angle) {
         todo!()
     }
+
+    fn set_pen_color(&mut self, r: f64, g: f64, b: f64) {
+        todo!()
+    }
+
+    fn set_bg(&mut self, r: f64, g: f64, b: f64) {
+        todo!()
+    }
+
+    fn reset(&mut self) {
+        todo!()
+    }
 }

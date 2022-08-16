@@ -15,35 +15,31 @@ use crate::state::{
     State,
     Side,
     Pos,
-    ScreenPosition
+    ScreenPosition, SizeType
 };
 
-pub struct Size {
-    w: f64,
-    h: f64
-}
+
 
 pub struct TurtleRender {
     cursor: Turtle,
     stack: LinkedList<State>,
     rng: ThreadRng,
-    pub size: Size
+    pub size: SizeType
 }
 
 impl TurtleRender {
-    pub fn new(w: u32, h: u32) -> Self {
+    pub fn new(size_type: SizeType) -> Self {
+        // Turtle setup
         let mut turtle = Turtle::new();
         
         turtle.set_speed("instant");
+        turtle.set_heading(0.);
 
         Self {
             cursor: turtle,
             stack: LinkedList::new(),
             rng: rand::thread_rng(),
-            size: Size {
-                w: w as f64,
-                h: h as f64
-            }
+            size: size_type
         }
     }
 
@@ -51,6 +47,17 @@ impl TurtleRender {
         match angle.side {
             Side::Left => self.turn_left(angle.value),
             Side::Right => self.turn_right(angle.value),
+        }
+    }
+
+    fn get_size(&mut self) -> (f64, f64) {
+        match self.size {
+            SizeType::Custom(w, h) => (w, h),
+            SizeType::Auto => {
+                let size = self.cursor.drawing_mut().size();
+
+                (size.width as f64, size.height as f64)
+            },
         }
     }
 }
@@ -142,24 +149,26 @@ impl Render for TurtleRender {
     }
 
     fn save_svg(&mut self, filename: &str) {
-        let (w, h) = (self.size.w as u32, self.size.h as u32);
+        let (w, h) = self.get_size();
 
-        self.cursor.drawing_mut().set_size((w, h));
+        self.cursor.drawing_mut().set_size((w as u32, h as u32));
         self.cursor.drawing().save_svg(filename);
+
     }
 
     fn set_pos(&mut self, pos: ScreenPosition) {
         let pen_size = self.cursor.pen_size();
+        let (w, h) = self.get_size();
         let dm = self.cursor.drawing_mut();
-        let w_mid = self.size.w / 2. - pen_size; 
-        let h_mid = self.size.h / 2.; 
+        let w_mid = (w + pen_size) / 2.; 
+        let h_mid = h / 2.; 
 
         match pos {
             ScreenPosition::Coord(x, y) => dm.set_center((x, y)),
             ScreenPosition::Center => dm.reset_center(),
             ScreenPosition::TopLeft => dm.set_center((-w_mid, h_mid)),
             ScreenPosition::TopRight => dm.set_center((w_mid, h_mid)),
-            ScreenPosition::BottomLeft => dm.set_center((w_mid, -h_mid)),
+            ScreenPosition::BottomLeft => dm.set_center((-w_mid, -h_mid)),
             ScreenPosition::BottomRight => dm.set_center((w_mid, -h_mid)),
         }
     }
@@ -178,5 +187,24 @@ impl Render for TurtleRender {
 
         // Turn
         self.turn(angle);
+    }
+
+    fn set_pen_color(&mut self, r: f64, g: f64, b: f64) {
+        let color = Color::rgb(r, g, b);
+        
+        self.cursor.set_pen_color(color);
+    }
+
+    fn set_bg(&mut self, r: f64, g: f64, b: f64) {
+        let color = Color::rgb(r, g, b);
+
+        self.cursor.drawing_mut().set_background_color(color);
+    }
+
+    fn reset(&mut self) {
+        self.cursor.reset();
+
+        self.cursor.set_speed("instant");
+        self.cursor.set_heading(0.);
     }
 }

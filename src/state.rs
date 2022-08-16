@@ -48,3 +48,8 @@ pub enum ScreenPosition {
     BottomLeft,
     BottomRight
 }
+
+pub enum SizeType {
+    Custom(f64, f64),
+    Auto
+}

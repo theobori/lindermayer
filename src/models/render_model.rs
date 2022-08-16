@@ -19,4 +19,7 @@ pub trait Render {
     fn set_pen_size(&mut self, size: f64);
     fn save_svg(&mut self, filename: &str);
     fn set_pos(&mut self, pos: ScreenPosition);
+    fn set_pen_color(&mut self, r: f64, g: f64, b: f64);
+    fn set_bg(&mut self, r: f64, g: f64, b: f64);
+    fn reset(&mut self);
 }
