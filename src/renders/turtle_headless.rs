@@ -1,6 +1,6 @@
 use crate::{
     models::render_model::Render,
-    state::ScreenPosition
+    state::{ScreenPosition, Angle}
 };
 
 pub struct TurtleHeadless {
@@ -57,6 +57,14 @@ impl Render for TurtleHeadless {
     }
 
     fn set_pos(&mut self, pos: ScreenPosition) {
+        todo!()
+    }
+
+    fn save_state_and_turn(&mut self, angle: Angle) {
+        todo!()
+    }
+
+    fn restore_state_and_turn(&mut self, angle: Angle) {
         todo!()
     }
 }

@@ -1,3 +1,5 @@
+use crate::state::Angle;
+
 #[derive(Clone)]
 pub enum Do {
     Forward(f64),
@@ -10,6 +12,8 @@ pub enum Do {
     ColorRandom,
     Save,
     Restore,
+    SaveAndTurn(Angle),
+    RestoreAndTurn(Angle),
     IncreaseSize(f64),
     DecreaseSize(f64),
     LineSize(f64)

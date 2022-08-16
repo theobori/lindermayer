@@ -27,7 +27,6 @@ pub struct TurtleRender {
     cursor: Turtle,
     stack: LinkedList<State>,
     rng: ThreadRng,
-    angle: Angle,
     pub size: Size
 }
 
@@ -41,11 +40,17 @@ impl TurtleRender {
             cursor: turtle,
             stack: LinkedList::new(),
             rng: rand::thread_rng(),
-            angle: Angle::default(),
             size: Size {
                 w: w as f64,
                 h: h as f64
             }
+        }
+    }
+
+    fn turn(&mut self, angle: Angle) {
+        match angle.side {
+            Side::Left => self.turn_left(angle.value),
+            Side::Right => self.turn_right(angle.value),
         }
     }
 }
@@ -60,22 +65,10 @@ impl Render for TurtleRender {
     }
 
     fn turn_left(&mut self, angle: f64) {
-        // Save angle
-        self.angle = Angle {
-            side: Side::Left,
-            value: angle
-        };
-
         self.cursor.left(angle);
     }
 
     fn turn_right(&mut self, angle: f64) {
-        // Save angle
-        self.angle = Angle {
-            side: Side::Right,
-            value: angle
-        };
-
         self.cursor.right(angle);
     }
 
@@ -87,21 +80,9 @@ impl Render for TurtleRender {
         let side = self.rng.gen::<u8>() % 2;
 
         // Turn and get turn side to save the angle
-        let turn_side = match side {
-            0 => {
-                self.cursor.left(angle);
-                Side::Left
-            }
-            _ => {
-                self.cursor.right(angle);
-                Side::Right
-            }
-        };
-
-        // Save angle
-        self.angle = Angle {
-            side: turn_side,
-            value: angle
+        match side {
+            0 => self.turn_left(angle),
+            _ => self.turn_right(angle)
         };
     }
 
@@ -114,7 +95,6 @@ impl Render for TurtleRender {
     }
 
     fn color_random(&mut self) {
-        // Random color
         let color = random::<Color>().opaque();
     
         self.cursor.set_pen_color(color);
@@ -129,27 +109,32 @@ impl Render for TurtleRender {
                 x: pos.x,
                 y: pos.y
             },
-            angle: self.angle.clone()
+            angle: self.cursor.heading()
         };
 
         self.stack.push_back(state);
     }
 
     fn restore_state(&mut self) {
+        self.pen_up();
+
         // Last state
         let state = self.stack.pop_back();
+
+        self.cursor.set_heading(0.);
 
         match state {
             Some(value) => {
                 let pos = value.position;
-                // Potential angle to instant turn the turtle
-                // let angle = value.angle;
-
-                self.cursor.set_x(pos.x);
-                self.cursor.set_y(pos.y);
+                let angle = value.angle;
+                
+                self.cursor.go_to([pos.x, pos.y]);
+                self.cursor.set_heading(angle);
             },
             None => return
         };
+
+        self.pen_down();
     }
 
     fn set_pen_size(&mut self, size: f64) {
@@ -164,8 +149,6 @@ impl Render for TurtleRender {
     }
 
     fn set_pos(&mut self, pos: ScreenPosition) {
-        // Turtle drawing mutable ref
-        
         let pen_size = self.cursor.pen_size();
         let dm = self.cursor.drawing_mut();
         let w_mid = self.size.w / 2. - pen_size; 
@@ -179,5 +162,21 @@ impl Render for TurtleRender {
             ScreenPosition::BottomLeft => dm.set_center((w_mid, -h_mid)),
             ScreenPosition::BottomRight => dm.set_center((w_mid, -h_mid)),
         }
+    }
+
+    fn save_state_and_turn(&mut self, angle: Angle) {
+        // Save
+        self.save_state();
+
+        // Turn
+        self.turn(angle);
+    }
+
+    fn restore_state_and_turn(&mut self, angle: Angle) {
+        // Restore
+        self.restore_state();
+
+        // Turn
+        self.turn(angle);
     }
 }

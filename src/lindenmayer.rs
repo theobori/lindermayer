@@ -222,6 +222,8 @@ impl Action for Lindenmayer {
             Do::IncreaseSize(size) => todo!(),
             Do::DecreaseSize(size) => todo!(),
             Do::LineSize(size) => self.cursor.set_pen_size(size),
+            Do::SaveAndTurn(angle) => self.cursor.save_state_and_turn(angle),
+            Do::RestoreAndTurn(angle) => self.cursor.restore_state_and_turn(angle),
         }
     }
 }

@@ -7,7 +7,7 @@ pub struct Pos {
 /// State of the "turtle" (cursor) in the render
 pub struct State {
     pub position: Pos,
-    pub angle: Angle
+    pub angle: f64
 }
 
 #[derive(Clone)]
@@ -20,6 +20,15 @@ pub enum Side {
 pub struct Angle {
     pub side: Side,
     pub value: f64
+}
+
+impl From<(Side, f64)> for Angle {
+    fn from(angle: (Side, f64)) -> Self {
+        Self {
+            side: angle.0,
+            value: angle.1
+        }
+    }
 }
 
 impl Default for Angle {
