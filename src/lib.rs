@@ -5,6 +5,7 @@ pub mod models;
 /// Graphic API(s) (SVG composers)
 pub mod renders;
 /// Locate, angle, size, etc..
+/// 
 /// Multiples things that help describing the figure at screen
 pub mod state;
 /// Available actions

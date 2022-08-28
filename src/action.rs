@@ -1,5 +1,6 @@
 use crate::state::Angle;
 
+/// L System actions
 #[derive(Clone)]
 pub enum Do {
     Forward(f64),

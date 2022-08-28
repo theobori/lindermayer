@@ -8,7 +8,7 @@ use crate::{
     },
     action::Do,
     state::ScreenPosition,
-    renders::render::Renderer
+    renders::renderer::Renderer
 };
 
 #[derive(Debug, Clone)]
@@ -65,6 +65,7 @@ impl Lindenmayer {
         }
     }
 
+    /// Return a clone of the current system state
     pub fn state(&self) -> LState {
         self.current_state.clone()
     }
@@ -77,7 +78,8 @@ impl Lindenmayer {
         self.data.consts.contains(&c)
     }
 
-    pub fn vars(&mut self, vars: &str) -> &mut Self {
+    /// Add a variable to the system
+    pub fn set_vars(&mut self, vars: &str) -> &mut Self {
         for var in vars.chars() {
             if self.is_const(var) {
                 panic!("{} is also a constant", var)
@@ -89,6 +91,7 @@ impl Lindenmayer {
         self
     }
 
+    /// Add a constant to the system
     pub fn set_consts(&mut self, consts: &str) -> &mut Self{
         for c in consts.chars() {
             if self.is_var(c) {
@@ -101,6 +104,7 @@ impl Lindenmayer {
         self
     }
 
+    /// Set the beginning value for the system
     pub fn set_axiom(&mut self, value: &str) -> &mut Self {
         self.current_state.value = String::from(value);
         
@@ -127,6 +131,7 @@ impl Lindenmayer {
         };
     }
 
+    /// Draw / compose the graphic figure
     pub fn draw(&mut self) -> &mut Self {
         let state = self.current_state.clone();
         let chars = state.value.chars();
@@ -151,6 +156,7 @@ impl Lindenmayer {
         self.overwrite_state_value();
     }
 
+    /// Executes `n` step(s)
     pub fn iterate(&mut self, n: usize) -> &mut Self {
         for _ in 0..n {
             self.step();
@@ -159,30 +165,35 @@ impl Lindenmayer {
         self
     }
 
+    /// Set the renderer
     pub fn set_render(&mut self, cursor: Renderer) -> &mut Self {
         self.cursor = cursor.get_render_obj();
 
         self
     }
 
+    /// Save the drawing as SVG
     pub fn save_svg(&mut self, filename: &str) -> &mut Self {
         self.cursor.save_svg(filename);
 
         self
     }
 
+    /// Set the graphic figure position on the drawing
     pub fn set_figure_pos(&mut self, pos: ScreenPosition) -> &mut Self {
         self.cursor.set_figure_pos(pos);
         
         self
     }
 
+    /// Set the drawing background color
     pub fn set_background(&mut self, r: f64, g: f64, b: f64) -> &mut Self {
         self.cursor.set_bg(r, g, b);
         
         self
     }
 
+    /// Resets the system
     pub fn reset(&mut self) -> &mut Self {
         // Reset Screen
         self.cursor.reset();
@@ -240,7 +251,7 @@ impl Rules for Lindenmayer {
 
     fn set_rule(&mut self, src: Self::Source, dest: &str) -> &mut Self {
         if self.is_var(src) == false {
-            self.vars(&src.to_string());
+            self.set_vars(&src.to_string());
         }
 
         self.rules.insert(src, String::from(dest));
