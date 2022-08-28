@@ -89,7 +89,7 @@ impl Lindenmayer {
         self
     }
 
-    pub fn consts(&mut self, consts: &str) -> &mut Self{
+    pub fn set_consts(&mut self, consts: &str) -> &mut Self{
         for c in consts.chars() {
             if self.is_var(c) {
                 panic!("{} is also a variable", c)
@@ -101,7 +101,7 @@ impl Lindenmayer {
         self
     }
 
-    pub fn axiom(&mut self, value: &str) -> &mut Self {
+    pub fn set_axiom(&mut self, value: &str) -> &mut Self {
         self.current_state.value = String::from(value);
         
         self
@@ -171,8 +171,8 @@ impl Lindenmayer {
         self
     }
 
-    pub fn set_start_pos(&mut self, pos: ScreenPosition) -> &mut Self {
-        self.cursor.set_pos(pos);
+    pub fn set_figure_pos(&mut self, pos: ScreenPosition) -> &mut Self {
+        self.cursor.set_figure_pos(pos);
         
         self
     }
@@ -199,7 +199,7 @@ impl Action for Lindenmayer {
 
     type Do = Do;
 
-    fn action(&mut self, name: Self::Name, action: Self::Do) -> &mut Self {
+    fn set_action(&mut self, name: Self::Name, action: Self::Do) -> &mut Self {
         self.actions.insert(name, action);
 
         self
@@ -238,7 +238,7 @@ impl Rules for Lindenmayer {
     type Destination = String;
     type Table = HashMap<char, String>;
 
-    fn rule(&mut self, src: Self::Source, dest: &str) -> &mut Self {
+    fn set_rule(&mut self, src: Self::Source, dest: &str) -> &mut Self {
         if self.is_var(src) == false {
             self.vars(&src.to_string());
         }

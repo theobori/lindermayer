@@ -3,6 +3,8 @@ use rand::{
     Rng,
     rngs::ThreadRng
 };
+
+use turtle::Point;
 use turtle::{
     Turtle,
     Color,
@@ -10,28 +12,36 @@ use turtle::{
 };
 
 use crate::models::render_model::Render;
+use crate::square::Square;
 use crate::state::{
     Angle,
     State,
     Side,
     Pos,
-    ScreenPosition, SizeType
+    ScreenPosition,
+    SizeType, Size
 };
-
-
 
 pub struct TurtleRender {
     cursor: Turtle,
     stack: LinkedList<State>,
     rng: ThreadRng,
-    pub size: SizeType
+    /// SVG size type
+    pub size: SizeType,
+    figure: Square,
+    /// Final figure position
+    position: ScreenPosition
 }
 
 impl TurtleRender {
     pub fn new(size_type: SizeType) -> Self {
         // Turtle setup
         let mut turtle = Turtle::new();
+
+        // Figure area default point
+        let point = turtle.position();
         
+        // Setup turtle graphic details
         turtle.set_speed("instant");
         turtle.set_heading(0.);
 
@@ -39,7 +49,12 @@ impl TurtleRender {
             cursor: turtle,
             stack: LinkedList::new(),
             rng: rand::thread_rng(),
-            size: size_type
+            size: size_type,
+            figure: Square {
+                pos: point,
+                size: Size::default()
+            },
+            position: ScreenPosition::default()
         }
     }
 
@@ -50,25 +65,49 @@ impl TurtleRender {
         }
     }
 
+    /// Return the SVG size
     fn get_size(&mut self) -> (f64, f64) {
         match self.size {
             SizeType::Custom(w, h) => (w, h),
-            SizeType::Auto => {
-                let size = self.cursor.drawing_mut().size();
-
-                (size.width as f64, size.height as f64)
-            },
+            
+            // Figure size
+            SizeType::Auto => (self.figure.size.w, self.figure.size.h)
         }
+    }
+
+    /// Return the final figure position (top left angle)
+    fn get_position(&mut self) -> Point {
+        let svg_size = self.get_size();
+        let pen_offset = self.cursor.pen_size();
+
+        // Offset including the pen line size
+        let x_offset = (svg_size.0 - self.figure.size.w - pen_offset) / 2.;
+        let y_offset = (svg_size.1 - self.figure.size.h - pen_offset) / 2.;
+
+        match self.position {
+            ScreenPosition::Coord(x, y) => (x, y),
+            ScreenPosition::Center => (-self.figure.pos.x, -self.figure.pos.y),
+            ScreenPosition::TopLeft =>(-self.figure.pos.x - x_offset, -self.figure.pos.y + y_offset),
+            ScreenPosition::TopRight => (-self.figure.pos.x + x_offset, -self.figure.pos.y + y_offset),
+            ScreenPosition::BottomLeft => (-self.figure.pos.x - x_offset, -self.figure.pos.y - y_offset),
+            ScreenPosition::BottomRight => (-self.figure.pos.x + x_offset, -self.figure.pos.y - y_offset),
+        }.into()
     }
 }
 
 impl Render for TurtleRender {
     fn step_forward(&mut self, distance: f64) {
         self.cursor.forward(distance);
+
+        // Updating area max size
+        self.figure.update_max_area(self.cursor.position());
     }
 
     fn step_backward(&mut self, distance: f64) {
         self.cursor.backward(distance);
+
+        // Updating area max size
+        self.figure.update_max_area(self.cursor.position());
     }
 
     fn turn_left(&mut self, angle: f64) {
@@ -149,28 +188,22 @@ impl Render for TurtleRender {
     }
 
     fn save_svg(&mut self, filename: &str) {
+        // SVG size
         let (w, h) = self.get_size();
+        // Figure pos
+        let mut pos = self.get_position();
+        // Square center
+        pos.x -= self.figure.size.w / 2.;
+        pos.y += self.figure.size.h / 2.;
 
         self.cursor.drawing_mut().set_size((w as u32, h as u32));
+        // Centering the drawing
+        self.cursor.drawing_mut().set_center(pos);
         self.cursor.drawing().save_svg(filename);
-
     }
 
-    fn set_pos(&mut self, pos: ScreenPosition) {
-        let pen_size = self.cursor.pen_size();
-        let (w, h) = self.get_size();
-        let dm = self.cursor.drawing_mut();
-        let w_mid = (w + pen_size) / 2.; 
-        let h_mid = h / 2.; 
-
-        match pos {
-            ScreenPosition::Coord(x, y) => dm.set_center((x, y)),
-            ScreenPosition::Center => dm.reset_center(),
-            ScreenPosition::TopLeft => dm.set_center((-w_mid, h_mid)),
-            ScreenPosition::TopRight => dm.set_center((w_mid, h_mid)),
-            ScreenPosition::BottomLeft => dm.set_center((-w_mid, -h_mid)),
-            ScreenPosition::BottomRight => dm.set_center((w_mid, -h_mid)),
-        }
+    fn set_figure_pos(&mut self, pos: ScreenPosition) {
+        self.position = pos;
     }
 
     fn save_state_and_turn(&mut self, angle: Angle) {

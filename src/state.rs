@@ -4,6 +4,30 @@ pub struct Pos {
     pub y: f64
 }
 
+impl Default for Pos {
+    fn default() -> Self {
+        Self {
+            x: 0.,
+            y: 0.
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Size {
+    pub w: f64,
+    pub h: f64
+}
+
+impl Default for Size {
+    fn default() -> Self {
+        Self {
+            w: 0.,
+            h: 0.
+        }
+    }
+}
+
 /// State of the "turtle" (cursor) in the render
 pub struct State {
     pub position: Pos,
@@ -47,6 +71,12 @@ pub enum ScreenPosition {
     TopRight,
     BottomLeft,
     BottomRight
+}
+
+impl Default for ScreenPosition {
+    fn default() -> Self {
+        ScreenPosition::Center
+    }
 }
 
 pub enum SizeType {

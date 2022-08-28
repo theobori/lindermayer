@@ -56,7 +56,7 @@ impl Render for TurtleHeadless {
         todo!()
     }
 
-    fn set_pos(&mut self, pos: ScreenPosition) {
+    fn set_figure_pos(&mut self, pos: ScreenPosition) {
         todo!()
     }
 
