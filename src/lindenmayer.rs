@@ -8,7 +8,7 @@ use crate::{
     },
     action::Do,
     state::ScreenPosition,
-    renders::render::RenderType
+    renders::render::Renderer
 };
 
 #[derive(Debug, Clone)]
@@ -55,13 +55,13 @@ pub struct Lindenmayer {
 }
 
 impl Lindenmayer {
-    pub fn new(render: RenderType) -> Self {
+    pub fn new(render: Renderer) -> Self {
         Self {
             data: LData::new(),
             current_state: LState::default(),
             rules: HashMap::new(),
             actions: HashMap::new(),
-            cursor: render.get_render()
+            cursor: render.get_render_obj()
         }
     }
 
@@ -159,8 +159,8 @@ impl Lindenmayer {
         self
     }
 
-    pub fn set_render(&mut self, cursor: RenderType) -> &mut Self {
-        self.cursor = cursor.get_render();
+    pub fn set_render(&mut self, cursor: Renderer) -> &mut Self {
+        self.cursor = cursor.get_render_obj();
 
         self
     }
