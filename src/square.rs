@@ -5,37 +5,59 @@ use crate::state::Size;
 #[derive(Debug)]
 pub struct Square {
     /// Top left position
-    pub pos: Point,
+    pub top_left: Point,
     /// Square area size
-    pub size: Size,
+    pub bottom_right: Point,
 }
 
 impl Square {
-    /// Change square position, the top left
+    /// Square width
+    pub fn width(&self) -> f64 {
+        self.bottom_right.x - self.top_left.x
+    }
+
+    /// Square height
+    pub fn height(&self) -> f64 {
+        self.top_left.y - self.bottom_right.y
+    }
+
+    /// Square size
+    pub fn size(&self) -> Size {
+        Size {
+            w: self.width(),
+            h: self.height()
+        }
+    }
+
+    /// Change square position, the top left corner
     pub fn set_position(&mut self, point: Point) {
-        self.pos = point;
+        // Storing size
+        let size = self.size();
+
+        // Changing top left corner
+        self.top_left = point;
+
+        // Adapting bottom right corner
+        self.bottom_right.x = self.top_left.x + size.w;
+        self.bottom_right.y = self.top_left.y + size.h;
     }
 
     /// Update the size if `point` is out of the square area
     pub fn update_max_area(&mut self, point: Point) {
-        // Updating top left position
-        if point.x < self.pos.x {
-            self.pos.x = point.x;
+        // Checking top left position
+        if point.x < self.top_left.x {
+            self.top_left.x = point.x;
         }
-        if point.y > self.pos.y {
-            self.pos.y = point.y;
+        if point.y > self.top_left.y {
+            self.top_left.y = point.y;
         }
 
-        // Storing points differences
-        let x_diff = point.x - self.pos.x;
-        let y_diff = self.pos.y - point.y;
-
-        // Updating the square size (w, h)
-        if self.size.w < x_diff {
-            self.size.w = x_diff;
+        // Checking bottom right position
+        if point.x > self.bottom_right.x {
+            self.bottom_right.x = point.x;
         }
-        if self.size.h < y_diff {
-            self.size.h = y_diff;
+        if point.y < self.bottom_right.y {
+            self.bottom_right.y = point.y;
         }
     }
 }

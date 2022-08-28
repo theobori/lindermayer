@@ -51,8 +51,8 @@ impl TurtleRender {
             rng: rand::thread_rng(),
             size: size_type,
             figure: Square {
-                pos: point,
-                size: Size::default()
+                top_left: point,
+                bottom_right: point
             },
             position: ScreenPosition::default()
         }
@@ -71,7 +71,11 @@ impl TurtleRender {
             SizeType::Custom(w, h) => (w, h),
             
             // Figure size
-            SizeType::Auto => (self.figure.size.w, self.figure.size.h)
+            SizeType::Auto => {
+                let figure_size = self.figure.size();
+        
+                (figure_size.w, figure_size.h)
+            }
         }
     }
 
@@ -80,17 +84,19 @@ impl TurtleRender {
         let svg_size = self.get_size();
         let pen_offset = self.cursor.pen_size();
 
+        let figure_size = self.figure.size();
+
         // Offset including the pen line size
-        let x_offset = (svg_size.0 - self.figure.size.w - pen_offset) / 2.;
-        let y_offset = (svg_size.1 - self.figure.size.h - pen_offset) / 2.;
+        let x_offset = (svg_size.0 - figure_size.w - pen_offset) / 2.;
+        let y_offset = (svg_size.1 - figure_size.h - pen_offset) / 2.;
 
         match self.position {
             ScreenPosition::Coord(x, y) => (x, y),
-            ScreenPosition::Center => (-self.figure.pos.x, -self.figure.pos.y),
-            ScreenPosition::TopLeft =>(-self.figure.pos.x - x_offset, -self.figure.pos.y + y_offset),
-            ScreenPosition::TopRight => (-self.figure.pos.x + x_offset, -self.figure.pos.y + y_offset),
-            ScreenPosition::BottomLeft => (-self.figure.pos.x - x_offset, -self.figure.pos.y - y_offset),
-            ScreenPosition::BottomRight => (-self.figure.pos.x + x_offset, -self.figure.pos.y - y_offset),
+            ScreenPosition::Center => (-self.figure.top_left.x, -self.figure.top_left.y),
+            ScreenPosition::TopLeft =>(-self.figure.top_left.x - x_offset, -self.figure.top_left.y + y_offset),
+            ScreenPosition::TopRight => (-self.figure.top_left.x + x_offset, -self.figure.top_left.y + y_offset),
+            ScreenPosition::BottomLeft => (-self.figure.top_left.x - x_offset, -self.figure.top_left.y - y_offset),
+            ScreenPosition::BottomRight => (-self.figure.top_left.x + x_offset, -self.figure.top_left.y - y_offset),
         }.into()
     }
 }
@@ -190,11 +196,13 @@ impl Render for TurtleRender {
     fn save_svg(&mut self, filename: &str) {
         // SVG size
         let (w, h) = self.get_size();
-        // Figure pos
+        // Figure pos / size
         let mut pos = self.get_position();
+        let size = self.figure.size();
+        
         // Square center
-        pos.x -= self.figure.size.w / 2.;
-        pos.y += self.figure.size.h / 2.;
+        pos.x -= size.w / 2.;
+        pos.y += size.h / 2.;
 
         self.cursor.drawing_mut().set_size((w as u32, h as u32));
         // Centering the drawing
