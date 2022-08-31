@@ -1,6 +1,6 @@
 # Lindenmayer system
 
-The renderer named `Renderer::TurtleNormal` has no headless mode, it means during the execution you will see the entire rendering process (turtle traces).
+The renderer named `Renderer::TurtleNormal` doesn't have headless mode, it means during the execution you will see the entire rendering process (turtle traces).
 
 ## How to build and run ?
 
