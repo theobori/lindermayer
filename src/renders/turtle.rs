@@ -19,8 +19,17 @@ use crate::state::{
     Side,
     Pos,
     ScreenPosition,
-    SizeType, Size
+    SizeType
 };
+
+impl Into<Pos> for Point {
+    fn into(self) -> Pos {
+        Pos {
+            x: self.x,
+            y: self.y,
+        }
+    }
+}
 
 pub struct TurtleRender {
     cursor: Turtle,
@@ -29,7 +38,6 @@ pub struct TurtleRender {
     /// SVG size type
     pub size: SizeType,
     figure: Square,
-    /// Final figure position
     position: ScreenPosition
 }
 
@@ -40,6 +48,10 @@ impl TurtleRender {
 
         // Figure area default point
         let point = turtle.position();
+        let pos = Pos {
+            x: point.x,
+            y: point.y
+        };
         
         // Setup turtle graphic details
         turtle.set_speed("instant");
@@ -51,8 +63,8 @@ impl TurtleRender {
             rng: rand::thread_rng(),
             size: size_type,
             figure: Square {
-                top_left: point,
-                bottom_right: point
+                top_left: pos,
+                bottom_right: pos
             },
             position: ScreenPosition::default()
         }
@@ -106,14 +118,14 @@ impl Render for TurtleRender {
         self.cursor.forward(distance);
 
         // Updating area max size
-        self.figure.update_max_area(self.cursor.position());
+        self.figure.update_max_area(self.cursor.position().into());
     }
 
     fn step_backward(&mut self, distance: f64) {
         self.cursor.backward(distance);
 
         // Updating area max size
-        self.figure.update_max_area(self.cursor.position());
+        self.figure.update_max_area(self.cursor.position().into());
     }
 
     fn turn_left(&mut self, angle: f64) {
@@ -170,7 +182,6 @@ impl Render for TurtleRender {
     fn restore_state(&mut self) {
         self.pen_up();
 
-        // Last state
         let state = self.stack.pop_back();
 
         self.cursor.set_heading(0.);
@@ -197,16 +208,15 @@ impl Render for TurtleRender {
         // SVG size
         let (w, h) = self.get_size();
         // Figure pos / size
-        let mut pos = self.get_position();
-        let size = self.figure.size();
+        let mut fig_pos = self.get_position();
+        let fig_size = self.figure.size();
         
         // Square center
-        pos.x -= size.w / 2.;
-        pos.y += size.h / 2.;
+        fig_pos.x -= fig_size.w / 2.;
+        fig_pos.y += fig_size.h / 2.;
 
         self.cursor.drawing_mut().set_size((w as u32, h as u32));
-        // Centering the drawing
-        self.cursor.drawing_mut().set_center(pos);
+        self.cursor.drawing_mut().set_center(fig_pos);
         self.cursor.drawing().save_svg(filename);
     }
 

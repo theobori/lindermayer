@@ -1,13 +1,11 @@
-use turtle::Point;
-
-use crate::state::Size;
+use crate::state::{Size, Pos};
 
 #[derive(Debug)]
 pub struct Square {
     /// Top left position
-    pub top_left: Point,
+    pub top_left: Pos,
     /// Square area size
-    pub bottom_right: Point,
+    pub bottom_right: Pos,
 }
 
 impl Square {
@@ -30,7 +28,7 @@ impl Square {
     }
 
     /// Change square position, the top left corner
-    pub fn set_position(&mut self, point: Point) {
+    pub fn set_position(&mut self, point: Pos) {
         // Storing size
         let size = self.size();
 
@@ -43,7 +41,7 @@ impl Square {
     }
 
     /// Update the size if `point` is out of the square area
-    pub fn update_max_area(&mut self, point: Point) {
+    pub fn update_max_area(&mut self, point: Pos) {
         // Checking top left position
         if point.x < self.top_left.x {
             self.top_left.x = point.x;
