@@ -1,5 +1,5 @@
 [package]
-name = "lindenmayer"
+name = "lindenmayer_graphic"
 version = "0.1.0"
 edition = "2018"
 
@@ -18,10 +18,9 @@ repository = "https://github.com/theobori/lindermayer"
 keywords = [
     "lib",
     "lindenmayer",
-    "l-system",
     "fractale",
     "svg",
-    "formal grammer"
+    "grammer"
 ]
 
 categories = [
