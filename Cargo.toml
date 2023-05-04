@@ -4,6 +4,32 @@ version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+include = [
+    "src/**",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE"
+]
+
+homepage = "https://github.com/theobori/lindermayer"
+description = "Build recursive images (fractals, plants, etc..), supporting multiple graphic APIs to build an SVGBuild recursive images (fractals, plants, etc..), supporting multiple graphic APIs to build an SVG"
+repository = "https://github.com/theobori/lindermayer"
+
+keywords = [
+    "lib",
+    "lindenmayer",
+    "l-system",
+    "fractale",
+    "svg",
+    "formal grammer"
+]
+
+categories = [
+    "rendering::data-formats"
+]
+
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 turtle = "1.0.0-rc.3"
