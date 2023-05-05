@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use weighted_rand::builder::*;
 
 use crate::{
     models::{
@@ -8,7 +9,7 @@ use crate::{
     },
     action::Do,
     state::ScreenPosition,
-    renders::renderer::Renderer
+    renders::renderer::Renderer, rule::{Rule, RulesWrap}
 };
 
 #[derive(Debug, Clone)]
@@ -32,12 +33,18 @@ pub struct LData {
     pub consts: Vec<char>,
 }
 
-impl LData {
-    pub fn new() -> Self {
+impl Default for LData {
+    fn default() -> Self {
         Self {
             vars: Vec::new(),
             consts: Vec::new(),
         }
+    }
+}
+
+impl LData {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -47,7 +54,7 @@ pub struct Lindenmayer {
     /// Current state
     current_state: LState,
     /// Rules table
-    rules: HashMap<char, String>,
+    rules: HashMap<char, Vec<Rule>>,
     /// Actions for vars / consts
     actions: HashMap<char, Do>,
     /// Graphics cursor
@@ -118,7 +125,22 @@ impl Lindenmayer {
         // Building new string
         for c in self.current_state.value.chars() {
             let part = match self.get_rule(c) {
-                Some(value) => value.clone(),
+                Some(value) => {
+                    let weights: Vec<u32> = value
+                        .iter()
+                        .map(| rule | rule.weight() as u32)
+                        .collect();
+                    
+                    let values: Vec<&str> = value
+                        .iter()
+                        .map(| rule | &*rule.value)
+                        .collect();
+
+                    let builder = WalkerTableBuilder::new(&weights);
+                    let wa_table = builder.build();
+                    
+                    values[wa_table.next()].to_string()
+                },
                 None => c.to_string()
             };
 
@@ -207,7 +229,6 @@ impl Lindenmayer {
 
 impl Action for Lindenmayer {
     type Name = char;
-
     type Do = Do;
 
     fn set_action(&mut self, name: Self::Name, action: Self::Do) -> &mut Self {
@@ -246,20 +267,29 @@ impl Action for Lindenmayer {
 
 impl Rules for Lindenmayer {
     type Source = char;
-    type Destination = String;
-    type Table = HashMap<char, String>;
+    type Destination = Rule;
+    type Table = HashMap<char, Vec<Rule>>;
 
-    fn set_rule(&mut self, src: Self::Source, dest: &str) -> &mut Self {
+    fn set_rule<T: Into<RulesWrap>>(
+        &mut self,
+        src: Self::Source,
+        dest: T
+    ) -> &mut Self {
         if self.is_var(src) == false {
             self.set_vars(&src.to_string());
         }
 
-        self.rules.insert(src, String::from(dest));
+        let rules_wrap: RulesWrap = dest.into();
+
+        self.rules.insert(src, rules_wrap.into());
     
         self
     }
 
-    fn get_rule(&self, src: Self::Source) -> Option<&Self::Destination> {
+    fn get_rule(
+        &self,
+        src: Self::Source
+    ) -> Option<&Vec<Self::Destination>> {
         self.rules.get(&src)
     }
 

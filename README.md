@@ -1,6 +1,6 @@
 # Lindenmayer system
 
-The renderer named `Renderer::TurtleNormal` doesn't have headless mode, it means during the execution you will see the entire rendering process (turtle traces).
+The renderer named `Renderer::TurtleNormal` doesn't have headless mode, it means during the execution you will see the entire rendering process (turtle traces). Instead you could use `Renderer::TurtleHeadless` if you only need an output file.
 
 ## How to build and run ?
 
@@ -12,14 +12,14 @@ The renderer named `Renderer::TurtleNormal` doesn't have headless mode, it means
 ### Plant
 
 ```rust
-use lindenmayer::{
+use lindenmayer_graphic::{
     lindenmayer::Lindenmayer,
     models::{
         rules_model::Rules,
         action_model::Action
     },
     action::Do,
-    renders::render::Renderer,
+    renders::renderer::Renderer,
     state::{
         ScreenPosition,
         SizeType
@@ -27,7 +27,7 @@ use lindenmayer::{
 };
 
 fn main() {
-    let renderer = Renderer::TurtleNormal(SizeType::Auto);
+    let renderer = Renderer::TurtleHeadless(SizeType::Auto);
 
     Lindenmayer::new(renderer)
         .set_consts("c+-[]")
@@ -52,17 +52,85 @@ fn main() {
 
 ![Plant](img/plant.svg)
 
-### Dragon
+### Stochastic plant
 
 ```rust
-use lindenmayer::{
+use std::fmt::format;
+
+use lindenmayer_graphic::{
     lindenmayer::Lindenmayer,
     models::{
         rules_model::Rules,
         action_model::Action
     },
     action::Do,
-    renders::render::Renderer,
+    renders::renderer::Renderer,
+    state::{
+        ScreenPosition,
+        SizeType
+    },
+    rule::Rule
+};
+
+fn tree(output: &str) {
+    let renderer = Renderer::TurtleHeadless(SizeType::Auto);
+
+    Lindenmayer::new(renderer)
+        .set_consts("cgy+-[]")
+        .set_rule(
+            'X',
+            vec![
+                Rule::new("cF+[[X]-X]-gF[-cFX]+X", 33),
+                Rule::new("gF-[[X]+X]+cF[+gFX]-X", 33),
+                Rule::new("yF-[[X]+X]+cF[+yFX]-X", 33)
+            ]
+        )
+        .set_rule('F', "cFcF")
+        .set_action('F', Do::Forward(10.0))
+        .set_action('[', Do::Save)
+        .set_action(']', Do::Restore)
+        .set_action('-', Do::Right(25.))
+        .set_action('+', Do::Left(25.))
+        .set_action('g', Do::PenColor(0., 150., 0.))
+        .set_action('y', Do::PenColor(150., 150., 0.))
+        .set_action('c', Do::PenColor(50., 50., 50.))
+        .set_axiom("+++cX")
+        .set_figure_pos(ScreenPosition::Center)
+        .set_background(0., 0., 0.)
+        .iterate(6)
+        .draw()
+        .save_svg(output);
+}
+
+fn main() {
+    for i in 0..5 {
+        let name = format!("tree_{}.svg", i);
+    
+        tree(&name);
+    }
+}
+
+```
+
+### Results
+
+![Plant 1](img/tree_0.svg)
+![Plant 1](img/tree_1.svg)
+![Plant 1](img/tree_2.svg)
+![Plant 1](img/tree_3.svg)
+![Plant 1](img/tree_4.svg)
+
+### Dragon
+
+```rust
+use lindenmayer_graphic::{
+    lindenmayer::Lindenmayer,
+    models::{
+        rules_model::Rules,
+        action_model::Action
+    },
+    action::Do,
+    renders::renderer::Renderer,
     state::{
         ScreenPosition,
         SizeType
@@ -71,7 +139,7 @@ use lindenmayer::{
 
 fn main() {
     let size = SizeType::Custom(400., 400.);
-    let renderer = Renderer::TurtleNormal(size);
+    let renderer = Renderer::TurtleHeadless(size);
 
     Lindenmayer::new(renderer)
         .set_consts("c+-")
@@ -94,45 +162,3 @@ fn main() {
 ### Result
 
 ![Dragon](img/dragon.svg)
-
-### Gosper
-
-```rust
-use lindenmayer::{
-    lindenmayer::Lindenmayer,
-    models::{
-        rules_model::Rules,
-        action_model::Action
-    },
-    action::Do,
-    renders::render::Renderer,
-    state::{
-        ScreenPosition,
-        SizeType
-    }
-};
-
-fn main() {
-    let render = Renderer::TurtleNormal(SizeType::Auto);
-
-    Lindenmayer::new(render)
-        .set_consts("c+-")
-        .set_rule('A',"A-B--B+A++AA+B-")
-        .set_rule('B', "+A-BB--B-A++A+B")
-        .set_action('A', Do::Forward(10.0))
-        .set_action('B', Do::Forward(10.0))
-        .set_action('-', Do::Right(60.))
-        .set_action('+', Do::Left(60.))
-        .set_action('c', Do::PenColor(173., 40., 49.))
-        .set_axiom("cA")
-        .set_figure_pos(ScreenPosition::Center)
-        .set_background(0., 0., 0.)
-        .iterate(5)
-        .draw()
-        .save_svg("img/gosper.svg");
-}
-```
-
-### Result
-
-![Gosper](img/gosper.svg)

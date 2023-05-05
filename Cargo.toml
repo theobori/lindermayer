@@ -34,6 +34,7 @@ readme = "README.md"
 turtle = "1.0.0-rc.3"
 turtle-svg = "0.1.1"
 rand = "0.8.4"
+weighted_rand = "0.3.2"
 
 [profile.dev.package."*"]
 opt-level = 3

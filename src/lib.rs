@@ -12,3 +12,5 @@ pub mod state;
 pub mod action;
 /// Square
 pub mod square;
+/// Rule abstraction
+pub mod rule;
